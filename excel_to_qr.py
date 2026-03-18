@@ -16,28 +16,32 @@ def is_valid_url(string):
     except:
         return False
 
+
 def main():
-    # Ask for Excel file location
-    print("QR Code Generator from Excel")
-    print("-" * 40)
-    
+    print("QR Code Generator from Excel / Spreadsheet")
+    print("Supports both .xlsx and .xls files")
+    print("-" * 50)
+
     while True:
-        excel_path = input("Enter the full path to your .xlsx file: ").strip()
-        
-        if not excel_path:
+        user_input = input("\nEnter the full path to your Excel file (.xlsx or .xls): ").strip()
+
+        # Handle drag-and-drop quotes (common on Windows)
+        user_input = user_input.strip('"').strip("'")
+
+        if not user_input:
             print("Please enter a path.")
             continue
-            
-        excel_path = Path(excel_path)
-        
+
+        excel_path = Path(user_input)
+
         if not excel_path.exists():
             print("File not found. Please check the path.")
             continue
-            
-        if excel_path.suffix.lower() != '.xlsx':
-            print("File must be an .xlsx file.")
+
+        if excel_path.suffix.lower() not in ('.xlsx', '.xls'):
+            print("File must be an Excel file (.xlsx or .xls)")
             continue
-            
+
         break
 
     # Create output folder next to the script
@@ -46,27 +50,27 @@ def main():
     output_folder.mkdir(exist_ok=True)
 
     print(f"\nQR codes will be saved to: {output_folder}")
+    print("Reading file...")
+
+    success = 0
+    skipped = 0
+    errors = 0
 
     try:
-        # Read the Excel file (assuming data starts from row 1, no header row)
+        # pandas.read_excel supports both .xls and .xlsx
         df = pd.read_excel(
             excel_path,
-            header=None,           # no header row
+            header=None,           # assuming no header row
             usecols=[0, 1],        # columns A and B
             names=['name', 'url'],
             dtype=str
         )
-        
-        # Clean up any extra whitespace
+
+        # Clean up whitespace
         df['name'] = df['name'].str.strip()
-        df['url']  = df['url'].str.strip()
+        df['url'] = df['url'].str.strip()
 
-        print(f"\nFound {len(df)} rows in the spreadsheet.")
-
-        # Counter for statistics
-        success = 0
-        skipped = 0
-        errors = 0
+        print(f"\nFound {len(df)} rows in the spreadsheet.\n")
 
         for idx, row in df.iterrows():
             name = row['name']
@@ -87,7 +91,7 @@ def main():
                 skipped += 1
                 continue
 
-            # Clean filename - keep only safe characters
+            # Create safe filename
             safe_name = "".join(c for c in name if c.isalnum() or c in " -_()").strip()
             if not safe_name:
                 safe_name = f"item_{idx+2}"
@@ -95,7 +99,7 @@ def main():
             filename = f"{safe_name}.png"
             output_path = output_folder / filename
 
-            # Avoid overwriting (add number if exists)
+            # Avoid overwriting
             counter = 1
             while output_path.exists():
                 output_path = output_folder / f"{safe_name}_{counter}.png"
@@ -109,11 +113,11 @@ def main():
                     box_size=10,
                     border=4,
                 )
-                
+
                 qr.add_data(url)
                 qr.make(fit=True)
 
-                # Nice modern look (rounded modules, dark blue)
+                # Styled QR: rounded modules + dark blue
                 qr_image = qr.make_image(
                     image_factory=StyledPilImage,
                     module_drawer=RoundedModuleDrawer(),
@@ -125,36 +129,52 @@ def main():
 
                 qr_image.save(output_path)
                 success += 1
-                print(f"✓ Saved: {filename}")
+                print(f"✓ Saved: {output_path.name}")
 
             except Exception as e:
                 print(f"✗ Error creating QR for {name} → {url}")
                 print(f"  {str(e)}")
                 errors += 1
 
-        print("\n" + "="*50)
-        print(f"Finished!")
+        print("\n" + "="*60)
+        print("Finished!")
         print(f"Successfully created : {success}")
         print(f"Skipped (invalid/empty): {skipped}")
         print(f"Errors               : {errors}")
-        print("="*50)
+        print("="*60)
+
+    except ImportError as ie:
+        print("\nMissing required package(s):")
+        print(str(ie))
+        print("\nPlease install the necessary libraries:")
+        print("  pip install pandas openpyxl qrcode[pil]")
+        print("  For older .xls files you may also need: pip install xlrd")
+        sys.exit(1)
 
     except Exception as e:
         print("\nError reading the Excel file:")
         print(str(e))
-        print("\nMake sure:")
-        print("• The file is not open in Excel")
-        print("• You have pandas and openpyxl installed")
-        print("  pip install pandas openpyxl qrcode[pil]")
+        print("\nCommon causes:")
+        print("• File is open in Excel → close it first")
+        print("• File is damaged or not a real Excel file")
+        print("• Missing packages → see installation instructions above")
+
 
 if __name__ == "__main__":
     try:
-        import qrcode
+        # Early check for critical dependencies
         import pandas
-    except ImportError:
+        import qrcode
+        import PIL
+    except ImportError as e:
         print("Missing required packages!")
         print("Please run:")
-        print("pip install pandas openpyxl qrcode[pil]")
+        print("  pip install pandas openpyxl qrcode[pil]")
+        print("  For old .xls files (Excel 97-2003): pip install xlrd")
         sys.exit(1)
-        
+
     main()
+
+    # Keep window open when double-clicked (Windows convenience)
+    if os.name == 'nt':
+        input("\nPress Enter to close...")
