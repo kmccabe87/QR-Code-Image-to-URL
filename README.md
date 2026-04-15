@@ -1,37 +1,40 @@
 # QR Toolkit
 
-A streamlined Python tool to:
+A streamlined Python tool for two core tasks:
 
-* Generate QR codes (SVG or PNG) from Excel files
-* Decode QR codes from images into Excel spreadsheets
+* Generate **QR code SVGs from Excel spreadsheets**
+* Extract **URLs/data from QR code images (PNG, JPG, etc.) into Excel**
 
-Built for fast, repeatable workflows like **laser engraving, batch QR creation, and data extraction**.
+Built for efficient workflows like **laser engraving, batch QR creation, and data recovery**.
 
 ---
 
-# 🚀 Features
+# 🚀 What This Tool Does
 
-* 📊 Automatically detects Excel files in the root folder
-* 🧾 Converts spreadsheets → QR code images (SVG or PNG)
-* 🖼️ Decodes QR codes from images → Excel
-* 📁 Organized output folders (auto-created)
-* 📅 Date-stamped decode results
-* ⚡ No file browsing or manual paths required
+### 1. Generate QR Codes
+
+* Input: Excel spreadsheet
+* Output: **SVG QR codes**
+
+### 2. Extract QR Data
+
+* Input: Image files (PNG, JPG, etc.)
+* Output: Excel spreadsheet with decoded URLs/data
 
 ---
 
 # 📦 Installation
 
-### 1. Clone the repository
+### Clone the repository
 
-```bash
+```bash id="y2b0rs"
 git clone https://github.com/yourusername/qr-toolkit.git
 cd qr-toolkit
 ```
 
-### 2. Install dependencies
+### Install dependencies
 
-```bash
+```bash id="gkqz2q"
 pip install pandas openpyxl qrcode[pil] pillow opencv-python
 ```
 
@@ -39,20 +42,20 @@ pip install pandas openpyxl qrcode[pil] pillow opencv-python
 
 # 📁 Project Structure
 
-```text
+```text id="e7q6hx"
 QR Code Tool/
 │
 ├── qr_toolkit/
-├── Images to Convert to URL's/   ← place images here for decoding
-├── data.xlsx                     ← place Excel files here for generation
+├── Images to Convert to URL's/   ← place QR images here
+├── data.xlsx                     ← place Excel files here
 ├── requirements.txt
 ```
 
 ---
 
-# 📊 Excel Format (REQUIRED)
+# 📊 Excel Format (FOR QR GENERATION)
 
-Your spreadsheet must follow this format:
+Your spreadsheet must follow this structure:
 
 | Column A | Column B |
 | -------- | -------- |
@@ -60,59 +63,52 @@ Your spreadsheet must follow this format:
 
 ### Example:
 
-```text
+```text id="5u5a3y"
 BR-1    https://example.com/1
 BR-2    https://example.com/2
-BR-3    WIFI:S:Network;T:WPA;P:password;;
 ```
 
-* **Column A** → Output filename
-* **Column B** → QR code content
+* **Column A** → SVG filename
+* **Column B** → QR code content (URL, text, WiFi config, etc.)
 
 ---
 
-# 🧾 Generate QR Codes (from Excel)
+# 🧾 Generate QR Code SVGs
 
-## SVG (recommended for laser engraving)
-
-```bash
+```bash id="gdx3pg"
 python -m qr_toolkit.cli generate-svg
-```
-
-## PNG
-
-```bash
-python -m qr_toolkit.cli generate-png
 ```
 
 ### What happens:
 
-* The tool scans the root folder for all `.xlsx` / `.xls` files
-* Processes each file automatically
-* Generates QR codes
+* Scans the root folder for all `.xlsx` / `.xls` files
+* Converts each row into a QR code
+* Saves SVG files automatically
+
+---
 
 ### Output:
 
-```text
+```text id="6w6s9c"
 QR Code Images/
     BR-1.svg
     BR-2.svg
 ```
 
-✔ Filenames come directly from Column A
-✔ No date added to image names
+✔ Filenames come from Column A
+✔ No renaming or date added
 
 ---
 
-# 🖼️ Decode QR Codes from Images
+# 🖼️ Convert QR Code Images → URLs
 
 ### 1. Place images in:
 
-```text
+```text id="3q3z1c"
 Images to Convert to URL's/
 ```
 
-### Supported formats:
+Supported formats:
 
 * PNG
 * JPG / JPEG
@@ -124,7 +120,7 @@ Images to Convert to URL's/
 
 ### 2. Run:
 
-```bash
+```bash id="r3lqdp"
 python -m qr_toolkit.cli decode
 ```
 
@@ -132,35 +128,16 @@ python -m qr_toolkit.cli decode
 
 ### Output:
 
-```text
+```text id="j9c3tt"
 QR Url's/
     2026-04-15_decoded_qr.xlsx
 ```
 
-✔ File is saved automatically
-✔ Date added to filename
-✔ No manual paths required
+✔ Contains:
 
----
-
-# 📊 Decoded Output Format
-
-| filename  | data                |
-| --------- | ------------------- |
-| code1.png | https://example.com |
-| code2.jpg | WIFI:S:Network;...  |
-
----
-
-# ⚠️ Important Notes
-
-* ❌ SVG files are **not supported for decoding**
-* QR codes must be:
-
-  * clear
-  * high contrast
-  * not overly stylized
-* Large or blurry QR codes may fail to decode
+* Column A → image filename
+* Column B → decoded URL/data
+  ✔ File is automatically date-stamped
 
 ---
 
@@ -168,15 +145,27 @@ QR Url's/
 
 ### Generate QR Codes
 
-```text
-Excel → QR Code Images/
+```text id="k1k3c9"
+Excel (URLs) → SVG QR Codes
 ```
 
-### Decode QR Codes
+### Extract URLs
 
-```text
-Images → QR Url's/
+```text id="y9p8tr"
+QR Images (PNG/JPG) → Excel (URLs)
 ```
+
+---
+
+# ⚠️ Important Notes
+
+* ❌ Only SVG output is supported for QR generation
+* ❌ SVG files are NOT supported for decoding
+* QR codes must be:
+
+  * clear
+  * high contrast
+  * not overly stylized
 
 ---
 
@@ -184,7 +173,7 @@ Images → QR Url's/
 
 ### No Excel files found
 
-* Make sure `.xlsx` files are in the root folder
+* Ensure `.xlsx` files are in the root folder
 
 ### No QR codes detected
 
@@ -192,7 +181,7 @@ Images → QR Url's/
 
 ### Missing modules
 
-```bash
+```bash id="q4y7m1"
 pip install pandas pillow opencv-python qrcode[pil] openpyxl
 ```
 
