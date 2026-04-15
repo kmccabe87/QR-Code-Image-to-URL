@@ -1,26 +1,201 @@
-# QR Code ↔ Excel Converter Tools
+# QR Toolkit
 
-Two simple Python scripts for bidirectional conversion:
+A simple Python tool to:
 
-- Extract URLs from QR code images → Excel spreadsheet
-- Generate QR code images from Excel spreadsheet (filename + URL)
+* Generate QR codes (SVG or PNG) from Excel files
+* Decode QR codes from images into Excel spreadsheets
 
-## Features
+Built for fast, repeatable workflows like **laser engraving, batch QR creation, and data extraction**.
 
-- **qr_to_excel.py**: Scans images in a folder, decodes QR codes, outputs `qr_codes_decoded.xlsx` with filename and URL
-- **excel_to_qr.py**: Reads `.xlsx` file (Column A = filename, Column B = URL), generates PNG QR codes in a new folder
+---
 
-## Requirements
+# 🚀 Features
 
-These libraries are required for full functionality:
+* 📊 Auto-detects Excel files in the root folder
+* 🧾 Converts spreadsheets → QR code images (SVG or PNG)
+* 🖼️ Decodes QR codes from images → Excel
+* 📁 Organized output folders (auto-created)
+* 🧹 Clean filenames (based on spreadsheet input)
+* 📅 Date-stamped decode results
 
-| Library          | Purpose                              | Installation command                  | Used in              | Notes                              |
-|------------------|--------------------------------------|---------------------------------------|----------------------|------------------------------------|
-| **pillow**       | Image processing (open, save, etc.)  | `pip install pillow`                  | Both scripts         | Core dependency (formerly PIL)     |
-| **pyzbar**       | QR/barcode decoding from images      | `pip install pyzbar`                  | qr_to_excel.py       | Wraps ZBar library                 |
-| **qrcode**       | QR code generation                   | `pip install qrcode[pil]`             | excel_to_qr.py       | `[pil]` installs Pillow integration|
-| **openpyxl**     | Read/write Excel `.xlsx` files       | `pip install openpyxl`                | Both scripts         | Pure Python, no Excel needed       |
+---
 
-**One-line install for everything:**
+# 📦 Installation
+
+### 1. Clone the repository
+
 ```bash
-pip install pillow pyzbar qrcode[pil] openpyxl
+git clone https://github.com/yourusername/qr-toolkit.git
+cd qr-toolkit
+```
+
+### 2. Install dependencies
+
+```bash
+pip install pandas openpyxl qrcode[pil] pillow opencv-python
+```
+
+---
+
+# 📁 Project Structure
+
+```text
+QR Code Tool/
+│
+├── qr_toolkit/
+├── images/                ← place images here for decoding
+├── data.xlsx              ← place Excel files here for generation
+├── requirements.txt
+```
+
+---
+
+# 📊 Excel Format (REQUIRED)
+
+Your spreadsheet must follow this format:
+
+| Column A | Column B |
+| -------- | -------- |
+| Filename | QR Data  |
+
+### Example:
+
+```text
+BR-1    https://example.com/1
+BR-2    https://example.com/2
+BR-3    WIFI:S:Network;T:WPA;P:password;;
+```
+
+* **Column A** → Output filename
+* **Column B** → QR code content
+
+---
+
+# 🧾 Generate QR Codes (SVG or PNG)
+
+## SVG (recommended for laser engraving)
+
+```bash
+python -m qr_toolkit.cli generate-svg
+```
+
+## PNG
+
+```bash
+python -m qr_toolkit.cli generate-png
+```
+
+### What happens:
+
+* The tool scans the root folder for all `.xlsx` / `.xls` files
+* Processes each file automatically
+* Generates QR codes
+
+### Output:
+
+```text
+QR Code Images/
+    BR-1.svg
+    BR-2.svg
+```
+
+✔ Filenames come directly from Column A
+✔ No date added to image names
+
+---
+
+# 🖼️ Decode QR Codes from Images
+
+### 1. Place images in the `images` folder:
+
+```text
+images/
+    code1.png
+    code2.jpg
+```
+
+### 2. Run:
+
+```bash
+python -m qr_toolkit.cli decode ./images
+```
+
+---
+
+### Output:
+
+```text
+QR Url's/
+    2026-04-15_decoded_qr.xlsx
+```
+
+✔ File is saved in a dedicated folder
+✔ Date added automatically
+
+---
+
+# 📊 Decoded Output Format
+
+| filename  | data                |
+| --------- | ------------------- |
+| code1.png | https://example.com |
+| code2.jpg | WIFI:S:Network;...  |
+
+---
+
+# ⚠️ Notes
+
+* Supported image formats:
+
+  * PNG, JPG, JPEG, BMP, WEBP, GIF
+* SVG decoding is **not supported**
+* QR codes must be clear and high contrast
+
+---
+
+# 🔁 Workflow Summary
+
+### Generate QR Codes
+
+```text
+Excel → QR Code Images/
+```
+
+### Decode QR Codes
+
+```text
+Images → QR Url's/
+```
+
+---
+
+# 🛠️ Troubleshooting
+
+### No Excel files found
+
+* Make sure `.xlsx` files are in the root folder
+
+### No QR codes detected
+
+* Check image quality (blurry or low contrast may fail)
+
+### Missing modules
+
+```bash
+pip install pandas pillow opencv-python qrcode[pil] openpyxl
+```
+
+---
+
+# 📄 License
+
+MIT License (or your choice)
+
+---
+
+# 🙌 Built With
+
+* qrcode
+* OpenCV
+* pandas
+* Pillow
